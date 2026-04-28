@@ -1,11 +1,11 @@
-![Graphical Playground - {{CHANGE_ME}}](.github/assets/repository-title.svg)
+![Graphical Playground - Actions](.github/assets/repository-title.svg)
 
 [![Explore Platform](.github/assets/button-platform.svg)](https://graphical-playground.com)
 [![Read Handbook](.github/assets/button-handbook.svg)](https://graphical-playground.com/handbook)
 [![Documentation](.github/assets/button-docs.svg)](https://docs.graphical-playground.com)
 [![Read Licensing](.github/assets/button-licensing.svg)](https://graphical-playground.com/licensing)
 
-# [@graphical-playground](https://github.com/GraphicalPlayground)/{{CHANGE_ME}}
+# [@graphical-playground](https://github.com/GraphicalPlayground)/gp-actions
 
 **Table of content**  
 [Overview](#overview)  
@@ -33,7 +33,7 @@
 
 ## Documentation
 
-Comprehensive documentation for `{{CHANGE_ME}}` is hosted on our main documentation portal. Whether you
+Comprehensive documentation for `gp-actions` is hosted on our main documentation portal. Whether you
 are building your first triangle or writing a custom features, our guides are designed to support your
 experimentation.
 
@@ -57,18 +57,18 @@ in community discussions or submitting code.
 
 ### Security
 
-If you discover a security vulnerability within `{{CHANGE_ME}}`, please do not report it by opening
+If you discover a security vulnerability within `gp-actions`, please do not report it by opening
 a public issue. Instead, refer to our [Security Policy](./SECURITY.md) for instructions on how to
 securely disclose the vulnerability to the maintainers.
 
 ### License
 
-`{{CHANGE_ME}}` is open-source software. Please see the [LICENSE.md](./LICENSE.md) file in the root
+`gp-actions` is open-source software. Please see the [LICENSE.md](./LICENSE.md) file in the root
 directory for full terms regarding modification, distribution, and use in your own projects.
 
 ### Donations
 
-If you find `{{CHANGE_ME}}` helpful for your learning, academic research, or game development journey,
+If you find `gp-actions` helpful for your learning, academic research, or game development journey,
 please consider supporting the project. Maintaining those repositories and projects takes
 significant time and resources!
 
