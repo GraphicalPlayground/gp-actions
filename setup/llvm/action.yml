@@ -1,0 +1,25 @@
+name: 'Setup LLVM'
+description: 'Set up LLVM and cache the necessary files for faster builds.'
+branding:
+  icon: 'code'
+  color: 'purple'
+inputs:
+  use-cache:
+    description: 'Whether to use caching for LLVM files.'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Set up LLVM'
+      shell: bash
+      run: |
+        echo "Setting up LLVM..."
+        # Add commands to set up LLVM here
+
+    - name: 'Cache LLVM files'
+      shell: bash
+      if: ${{ inputs.use-cache == 'true' }}
+      run: |
+        echo "Caching LLVM files..."
+        # Add commands to cache LLVM files here

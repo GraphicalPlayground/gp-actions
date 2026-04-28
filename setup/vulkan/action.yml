@@ -1,0 +1,25 @@
+name: 'Setup Vulkan'
+description: 'Set up Vulkan and cache the necessary files for faster builds.'
+branding:
+  icon: 'triangle'
+  color: 'red'
+inputs:
+  use-cache:
+    description: 'Whether to use caching for Vulkan files.'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Set up Vulkan'
+      shell: bash
+      run: |
+        echo "Setting up Vulkan..."
+        # Add commands to set up Vulkan here
+
+    - name: 'Cache Vulkan files'
+      shell: bash
+      if: ${{ inputs.use-cache == 'true' }}
+      run: |
+        echo "Caching Vulkan files..."
+        # Add commands to cache Vulkan files here

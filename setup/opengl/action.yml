@@ -1,0 +1,25 @@
+name: 'Setup OpenGL'
+description: 'Set up OpenGL and cache the necessary files for faster builds.'
+branding:
+  icon: 'aperture'
+  color: 'blue'
+inputs:
+  use-cache:
+    description: 'Whether to use caching for OpenGL files.'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Set up OpenGL'
+      shell: bash
+      run: |
+        echo "Setting up OpenGL..."
+        # Add commands to set up OpenGL here
+
+    - name: 'Cache OpenGL files'
+      shell: bash
+      if: ${{ inputs.use-cache == 'true' }}
+      run: |
+        echo "Caching OpenGL files..."
+        # Add commands to cache OpenGL files here

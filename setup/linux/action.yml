@@ -1,0 +1,25 @@
+name: 'Setup Linux Dependencies'
+description: 'Set up Linux dependencies and cache the necessary files for faster builds.'
+branding:
+  icon: 'terminal'
+  color: 'yellow'
+inputs:
+  use-cache:
+    description: 'Whether to use caching for Linux files.'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Set up Linux dependencies'
+      shell: bash
+      run: |
+        echo "Setting up Linux dependencies..."
+        # Add commands to set up Linux dependencies here
+
+    - name: 'Cache Linux files'
+      shell: bash
+      if: ${{ inputs.use-cache == 'true' }}
+      run: |
+        echo "Caching Linux files..."
+        # Add commands to cache Linux files here

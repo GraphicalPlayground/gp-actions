@@ -1,0 +1,25 @@
+name: 'Setup DirectX 11'
+description: 'Set up DirectX 11 and cache the necessary files for faster builds.'
+branding:
+  icon: 'box'
+  color: 'gray-dark'
+inputs:
+  use-cache:
+    description: 'Whether to use caching for DirectX 11 files.'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Set up DirectX 11'
+      shell: bash
+      run: |
+        echo "Setting up DirectX 11..."
+        # Add commands to set up DirectX 11 here
+
+    - name: 'Cache DirectX 11 files'
+      shell: bash
+      if: ${{ inputs.use-cache == 'true' }}
+      run: |
+        echo "Caching DirectX 11 files..."
+        # Add commands to cache DirectX 11 files here

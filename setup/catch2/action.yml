@@ -1,0 +1,25 @@
+name: 'Setup Catch2'
+description: 'Set up Catch2 and cache the necessary files for faster builds.'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+inputs:
+  use-cache:
+    description: 'Whether to use caching for Catch2 files.'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Set up Catch2'
+      shell: bash
+      run: |
+        echo "Setting up Catch2..."
+        # Add commands to set up Catch2 here
+
+    - name: 'Cache Catch2 files'
+      shell: bash
+      if: ${{ inputs.use-cache == 'true' }}
+      run: |
+        echo "Caching Catch2 files..."
+        # Add commands to cache Catch2 files here
