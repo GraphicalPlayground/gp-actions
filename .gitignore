@@ -1,0 +1,81 @@
+
+# ============================================================================
+# Graphical Playground {{CHANGE_ME}} - .gitignore
+# ============================================================================
+
+# ====================
+# IDE Specific
+# ====================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# CLion
+.idea/
+cmake-build-*/
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+
+# ====================
+# Agentic Specific
+# ====================
+
+CLAUDE.md
+.claude/
+
+# ====================
+# OS Specific
+# ====================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ====================
+# Logs and Temporary Files
+# ====================
+*.log
+*.tlog
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*~.nib
+
+# ====================
+# Backup Files
+# ====================
+*.bak
+*.backup
+*~
+
+# ====================
+# Documentation Generated
+# ====================
+docs/html/
+docs/latex/
+Doxyfile.bak
+
+# ====================
+# Custom Project Specific
+# ====================
+# Add any project-specific ignores here
