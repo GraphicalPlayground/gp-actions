@@ -1,25 +1,21 @@
+# Copyright (c) - Graphical Playground. All rights reserved.
+# For more information, see https://graphical-playground/legal
+# mailto:support AT graphical-playground DOT com
+
 name: 'Setup Windows Dependencies'
-description: 'Set up Windows dependencies and cache the necessary files for faster builds.'
+description: 'Set up Windows dependencies for GitHub Actions.'
+
 branding:
   icon: 'grid'
   color: 'blue'
-inputs:
-  use-cache:
-    description: 'Whether to use caching for Windows files.'
-    required: false
-    default: 'true'
+
 runs:
   using: 'composite'
   steps:
-    - name: 'Set up Windows dependencies'
+    - name: Run Setup Script
       shell: bash
       run: |
-        echo "Setting up Windows dependencies..."
-        # Add commands to set up Windows dependencies here
-
-    - name: 'Cache Windows files'
-      shell: bash
-      if: ${{ inputs.use-cache == 'true' }}
-      run: |
-        echo "Caching Windows files..."
-        # Add commands to cache Windows files here
+        chmod +x ${{ github.action_path }}/setup-windows.sh
+        ${{ github.action_path }}/setup-windows.sh
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
