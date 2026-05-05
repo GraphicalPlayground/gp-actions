@@ -3,7 +3,7 @@
 # mailto:support AT graphical-playground DOT com
 
 name: 'Setup Linux Dependencies'
-description: 'Set up Linux dependencies and cache the necessary files for faster builds.'
+description: 'Set up Linux dependencies for GitHub Actions.'
 
 branding:
   icon: 'terminal'
