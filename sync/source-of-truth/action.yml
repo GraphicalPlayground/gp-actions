@@ -67,7 +67,7 @@ runs:
   using: 'composite'
   steps:
     - name: 'Checkout Source of Truth'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: ${{ inputs.sot-repository }}
         token: ${{ inputs.sot-token }}
@@ -106,15 +106,21 @@ runs:
     - name: 'Commit and Push Changes'
       if: inputs.push-changes == 'true'
       shell: bash
-      working-directory: ${{ github.workspace }}
       run: |
+        # The nested SOT checkout temporarily overrides HOME for global git config
+        # changes, which can evict the workspace safe.directory entry set by the
+        # caller's checkout step. Re-declare it explicitly before any git command.
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-        if ! git diff --quiet || ! git diff --cached --quiet; then
-          git add .
-          git commit -m "sync[bot]: from source of truth: ${{ inputs.sot-repository }}@${{ inputs.sot-branch }}"
-          git push
-        else
+        cd "$GITHUB_WORKSPACE"
+
+        if git diff --quiet && git diff --cached --quiet; then
           echo "No changes to commit."
+          exit 0
         fi
+
+        git add .
+        git commit -m "sync[bot]: from source of truth: ${{ inputs.sot-repository }}@${{ inputs.sot-branch }}"
+        git push
