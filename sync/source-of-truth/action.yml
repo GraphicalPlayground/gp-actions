@@ -104,13 +104,14 @@ runs:
         )" | ${{ github.action_path }}/sync-sot.sh
 
     - name: 'Commit and Push Changes'
-      if: ${{ inputs.push-changes == 'true' }}
+      if: inputs.push-changes == 'true'
       shell: bash
+      working-directory: ${{ github.workspace }}
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-        if ! git diff --quiet; then
+        if ! git diff --quiet || ! git diff --cached --quiet; then
           git add .
           git commit -m "sync[bot]: from source of truth: ${{ inputs.sot-repository }}@${{ inputs.sot-branch }}"
           git push
