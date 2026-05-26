@@ -14,6 +14,10 @@ set -euo pipefail
 
 gp.isCI || gp.mockCI
 
+# Save current directory for later use; the SOT checkout step will change it
+# to the SOT repo, but we need to return to the original workspace for syncing.
+current_dir="$(pwd)"
+
 #  Constants
 
 readonly _SOT_PARTIAL_START="<!-- gp:protected:start -->"
@@ -294,10 +298,12 @@ _sot_sync_file() {
 _sot_commit_and_push() {
   gp.startGroup "Committing Changes"
 
+  cd "$current_dir"
+
   gp.requireCommand git
 
-  git --global config user.name  "github-actions[bot]"
-  git --global config user.email "github-actions[bot]@users.noreply.github.com"
+  git config --global user.name  "github-actions[bot]"
+  git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
   if git diff --quiet \
       && git diff --cached --quiet; then
