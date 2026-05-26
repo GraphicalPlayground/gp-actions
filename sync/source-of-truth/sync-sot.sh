@@ -296,25 +296,20 @@ _sot_commit_and_push() {
 
   gp.requireCommand git
 
-  # The nested SOT checkout step temporarily overrides HOME to write global git
-  # config, which evicts the safe.directory entry the caller's checkout set for
-  # GITHUB_WORKSPACE. Re-declare it here so subsequent git commands can see it.
-  git config --global --add safe.directory "${_SOT_WORKSPACE}"
+  git --global config user.name  "github-actions[bot]"
+  git --global config user.email "github-actions[bot]@users.noreply.github.com"
 
-  git -C "${_SOT_WORKSPACE}" config user.name  "github-actions[bot]"
-  git -C "${_SOT_WORKSPACE}" config user.email "github-actions[bot]@users.noreply.github.com"
-
-  if git -C "${_SOT_WORKSPACE}" diff --quiet \
-      && git -C "${_SOT_WORKSPACE}" diff --cached --quiet; then
+  if git diff --quiet \
+      && git diff --cached --quiet; then
     gp.info "No changes to commit."
     gp.endGroup
     return 0
   fi
 
-  git -C "${_SOT_WORKSPACE}" add .
-  git -C "${_SOT_WORKSPACE}" commit \
+  git add .
+  git commit \
     -m "sync[bot]: from source of truth: ${sot_repository}@${sot_branch}"
-  git -C "${_SOT_WORKSPACE}" push
+  git push
 
   gp.success "Changes committed and pushed."
   gp.endGroup
