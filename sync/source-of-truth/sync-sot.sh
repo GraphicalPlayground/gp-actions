@@ -305,7 +305,9 @@ _sot_commit_and_push() {
   git config --global user.name  "github-actions[bot]"
   git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-  git add .
+  local sot_rel
+  sot_rel="$(realpath --relative-to="$_SOT_WORKSPACE" "$sot_path")"
+  git add -- . ":(exclude)${sot_rel}"
 
   if git diff --cached --quiet; then
     gp.info "No changes to commit."
