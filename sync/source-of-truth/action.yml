@@ -1,0 +1,119 @@
+# Copyright (c) - Graphical Playground. All rights reserved.
+# For more information, see https://graphical-playground/legal
+# mailto:support AT graphical-playground DOT com
+
+name: 'Synchronize Source of Truth'
+description: 'Synchronize the source of truth with the latest changes.'
+
+branding:
+  icon: 'download-cloud'
+  color: 'blue'
+
+inputs:
+  sot-repository:
+    description: 'The repository that serves as the source of truth.'
+    required: true
+    default: 'GraphicalPlayground/gp-source-of-truth'
+  sot-token:
+    description: 'The GitHub token to use for authentication.'
+    required: false
+    default: ${{ github.token }}
+  sot-branch:
+    description: 'The branch of the source of truth repository to synchronize from.'
+    required: true
+    default: 'main'
+  license:
+    description: >
+      The license to use for the project (e.g., MIT, Apache-2.0).
+      Selects which file from the SOT licenses/ directory is written as LICENSE.md.
+    required: true
+    default: 'MIT'
+  allow-templatization:
+    description: >
+      Whether to expand {{GP_*}} placeholders during synchronization.
+      When true, values like {{GP_REPO_NAME}} are replaced with real values.
+    required: true
+    default: 'true'
+  custom-vars:
+    description: >
+      JSON object of additional template variables to expose during substitution.
+      Keys are used as {{KEY}} placeholders in SOT template files.
+      Example: '{"WEBSITE": "https://example.com", "DISCORD": "https://discord.gg/xxx"}'
+    required: false
+    default: '{}'
+  file-to-sync:
+    description: >
+      Comma-separated list of files to synchronize from the SOT repository.
+      Use LICENSE.md to sync the license file selected by the 'license' input.
+      Files containing <!-- gp:protected:start --> / <!-- gp:protected:end --> markers
+      are treated as partial templates: only the header and footer are overwritten
+      and the region between the markers is preserved per-repository.
+    required: false
+    default: 'SECURITY.md,DONORS.md,CODE_OF_CONDUCT.md,CITATION.cff,LICENSE_HEADER,.github/FUNDING.yml,LICENSE.md,.mailmap,GOVERNANCE.md'
+  push-changes:
+    description: 'Whether to automatically commit and push changes after synchronization.'
+    required: true
+    default: 'true'
+
+outputs:
+  synced-count:
+    description: 'Number of files successfully synchronized.'
+    value: ${{ steps.sync.outputs.synced-count }}
+  skipped-count:
+    description: 'Number of files skipped (not found in SOT or errors).'
+    value: ${{ steps.sync.outputs.skipped-count }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Checkout Source of Truth'
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.sot-repository }}
+        token: ${{ inputs.sot-token }}
+        path: 'source-of-truth'
+        ref: ${{ inputs.sot-branch }}
+
+    - name: 'Synchronize Files'
+      id: sync
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.sot-token }}
+      run: |
+        chmod +x ${{ github.action_path }}/sync-sot.sh
+
+        sot_path="$(realpath source-of-truth)"
+
+        printf '%s' "$(jq -n \
+          --arg license "${{ inputs.license }}" \
+          --arg sot_repository "${{ inputs.sot-repository }}" \
+          --arg sot_branch "${{ inputs.sot-branch }}" \
+          --arg sot_path "$sot_path" \
+          --argjson allow_templatization ${{ inputs.allow-templatization }} \
+          --arg files_to_sync "${{ inputs.file-to-sync }}" \
+          --argjson custom_vars '${{ inputs.custom-vars }}' \
+          '{
+            "license": $license,
+            "sot-repository": $sot_repository,
+            "sot-branch": $sot_branch,
+            "sot-path": $sot_path,
+            "allow-templatization": $allow_templatization,
+            "file-to-sync": $files_to_sync,
+            "custom-vars": $custom_vars
+          }'
+        )" | ${{ github.action_path }}/sync-sot.sh
+
+    - name: 'Commit and Push Changes'
+      if: ${{ inputs.push-changes == 'true' }}
+      shell: bash
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        if ! git diff --quiet; then
+          git add .
+          git commit -m "sync[bot]: from source of truth: ${{ inputs.sot-repository }}@${{ inputs.sot-branch }}"
+          git push
+        else
+          echo "No changes to commit."
+        fi
