@@ -54,6 +54,26 @@ inputs:
     description: 'Whether to automatically commit and push changes after synchronization.'
     required: true
     default: 'true'
+  target-branches:
+    description: >
+      Comma-separated list of branches where changes may be committed or used as
+      the PR base. Commits are skipped when the current branch is not in this
+      list. Use * to allow any branch.
+    required: false
+    default: 'main'
+  create-pr:
+    description: >
+      When true, commits are pushed to a separate branch and a pull request is
+      opened targeting the current branch instead of committing directly.
+      Requires the token to have pull-request write permissions.
+    required: false
+    default: 'false'
+  pr-branch:
+    description: >
+      Name of the branch created when create-pr is true.
+      If the branch already exists it is reset and force-pushed.
+    required: false
+    default: 'sync/source-of-truth'
 
 outputs:
   synced-count:
@@ -62,6 +82,9 @@ outputs:
   skipped-count:
     description: 'Number of files skipped (not found in SOT or errors).'
     value: ${{ steps.sync.outputs.skipped-count }}
+  pr-url:
+    description: 'URL of the pull request created when create-pr is true.'
+    value: ${{ steps.sync.outputs.pr-url }}
 
 runs:
   using: 'composite'
@@ -93,6 +116,9 @@ runs:
           --arg files_to_sync "${{ inputs.file-to-sync }}" \
           --argjson custom_vars '${{ inputs.custom-vars }}' \
           --argjson push_changes ${{ inputs.push-changes }} \
+          --arg target_branches "${{ inputs.target-branches }}" \
+          --argjson create_pr ${{ inputs.create-pr }} \
+          --arg pr_branch "${{ inputs.pr-branch }}" \
           '{
             "license": $license,
             "sot-repository": $sot_repository,
@@ -101,6 +127,9 @@ runs:
             "allow-templatization": $allow_templatization,
             "file-to-sync": $files_to_sync,
             "custom-vars": $custom_vars,
-            "push-changes": $push_changes
+            "push-changes": $push_changes,
+            "target-branches": $target_branches,
+            "create-pr": $create_pr,
+            "pr-branch": $pr_branch
           }'
         )" | ${{ github.action_path }}/sync-sot.sh

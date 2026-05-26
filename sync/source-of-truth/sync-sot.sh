@@ -43,6 +43,7 @@ PYEOF
 declare -A _SOT_VARS=()
 declare -a _SOT_RESULTS=()
 _SOT_WORKSPACE=""
+_SOT_PR_URL=""
 
 #  Input parsing
 
@@ -62,6 +63,9 @@ _sot_parse_inputs() {
   files_to_sync="$(_sot_field '.["file-to-sync"]')"
   custom_vars_raw="$(_sot_field '.["custom-vars"] // "{}"')"
   push_changes="$(_sot_field '.["push-changes"]')"
+  target_branches="$(_sot_field '.["target-branches"]')"
+  create_pr="$(_sot_field '.["create-pr"]')"
+  pr_branch="$(_sot_field '.["pr-branch"]')"
 
   _SOT_WORKSPACE="$(gp.getWorkspace)"
 }
@@ -314,11 +318,60 @@ _sot_commit_and_push() {
     gp.endGroup
     return 0
   fi
-  git commit \
-    -m "sync[bot]: from source of truth: ${sot_repository}@${sot_branch}"
-  git push
 
-  gp.success "Changes committed and pushed."
+  # Branch whitelist check
+  local current_branch
+  current_branch="$(git rev-parse --abbrev-ref HEAD)"
+
+  local branch_allowed=false
+  IFS=',' read -ra _allowed_branches <<< "$target_branches"
+  for _b in "${_allowed_branches[@]}"; do
+    _b="$(gp.trim "$_b")"
+    if [[ "$_b" == "$current_branch" || "$_b" == "*" ]]; then
+      branch_allowed=true
+      break
+    fi
+  done
+
+  if [[ "$branch_allowed" != "true" ]]; then
+    gp.warning "Branch '${current_branch}' is not in target-branches (${target_branches}), skipping commit."
+    gp.endGroup
+    return 0
+  fi
+
+  local commit_msg="sync[bot]: from source of truth: ${sot_repository}@${sot_branch}"
+
+  if [[ "$create_pr" == "true" ]]; then
+    gp.requireCommand gh
+
+    git checkout -B "$pr_branch"
+    git commit -m "$commit_msg"
+    git push --force-with-lease origin "$pr_branch"
+
+    local existing_pr
+    existing_pr="$(gh pr list \
+      --head "$pr_branch" \
+      --base "$current_branch" \
+      --json number \
+      --jq '.[0].number // empty' 2>/dev/null || true)"
+
+    if [[ -z "$existing_pr" ]]; then
+      _SOT_PR_URL="$(gh pr create \
+        --title "$commit_msg" \
+        --body "Automated synchronization from \`${sot_repository}@${sot_branch}\`, run [#$(gp.getRunNumber)]($(gp.getRunUrl))." \
+        --base "$current_branch" \
+        --head "$pr_branch")"
+      gp.setOutput "pr-url" "$_SOT_PR_URL"
+      gp.success "Pull request created: ${_SOT_PR_URL}"
+    else
+      gp.success "Pull request #${existing_pr} updated (branch force-pushed)."
+    fi
+  else
+    git commit -m "$commit_msg"
+    git push
+    gp.success "Changes committed and pushed."
+  fi
+
   gp.endGroup
 }
 
@@ -336,6 +389,10 @@ _sot_write_summary() {
   gp.summaryHr
   gp.summaryBlank
   gp.summary "_Synced from \`${sot_repository}@${sot_branch}\`, run [#$(gp.getRunNumber)]($(gp.getRunUrl))_"
+  if [[ -n "$_SOT_PR_URL" ]]; then
+    gp.summaryBlank
+    gp.summary "_Pull request: ${_SOT_PR_URL}_"
+  fi
 }
 
 #  Main
@@ -363,6 +420,9 @@ main() {
   gp.info "Workspace     : ${_SOT_WORKSPACE}"
   gp.info "Files         : ${files_to_sync}"
   gp.info "Push Changes  : ${push_changes}"
+  gp.info "Target Branches: ${target_branches}"
+  gp.info "Create PR     : ${create_pr}"
+  [[ "$create_pr" == "true" ]] && gp.info "PR Branch     : ${pr_branch}"
   gp.endGroup
 
   _sot_build_vars
