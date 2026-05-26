@@ -305,14 +305,13 @@ _sot_commit_and_push() {
   git config --global user.name  "github-actions[bot]"
   git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-  if git diff --quiet \
-      && git diff --cached --quiet; then
+  git add .
+
+  if git diff --cached --quiet; then
     gp.info "No changes to commit."
     gp.endGroup
     return 0
   fi
-
-  git add .
   git commit \
     -m "sync[bot]: from source of truth: ${sot_repository}@${sot_branch}"
   git push
