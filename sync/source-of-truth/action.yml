@@ -49,7 +49,7 @@ inputs:
       are treated as partial templates: only the header and footer are overwritten
       and the region between the markers is preserved per-repository.
     required: false
-    default: 'SECURITY.md,DONORS.md,CODE_OF_CONDUCT.md,CITATION.cff,LICENSE_HEADER,.github/FUNDING.yml,LICENSE.md,.mailmap,GOVERNANCE.md'
+    default: 'SECURITY.md,DONORS.md,CODE_OF_CONDUCT.md,README.md,CITATION.cff,LICENSE_HEADER,.github/FUNDING.yml,LICENSE.md,.mailmap,GOVERNANCE.md'
   push-changes:
     description: 'Whether to automatically commit and push changes after synchronization.'
     required: true
