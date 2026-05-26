@@ -92,6 +92,7 @@ runs:
           --argjson allow_templatization ${{ inputs.allow-templatization }} \
           --arg files_to_sync "${{ inputs.file-to-sync }}" \
           --argjson custom_vars '${{ inputs.custom-vars }}' \
+          --argjson push_changes ${{ inputs.push-changes }} \
           '{
             "license": $license,
             "sot-repository": $sot_repository,
@@ -99,28 +100,7 @@ runs:
             "sot-path": $sot_path,
             "allow-templatization": $allow_templatization,
             "file-to-sync": $files_to_sync,
-            "custom-vars": $custom_vars
+            "custom-vars": $custom_vars,
+            "push-changes": $push_changes
           }'
         )" | ${{ github.action_path }}/sync-sot.sh
-
-    - name: 'Commit and Push Changes'
-      if: inputs.push-changes == 'true'
-      shell: bash
-      run: |
-        # The nested SOT checkout temporarily overrides HOME for global git config
-        # changes, which can evict the workspace safe.directory entry set by the
-        # caller's checkout step. Re-declare it explicitly before any git command.
-        git config --global --add safe.directory "$GITHUB_WORKSPACE"
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-        cd "$GITHUB_WORKSPACE"
-
-        if git diff --quiet && git diff --cached --quiet; then
-          echo "No changes to commit."
-          exit 0
-        fi
-
-        git add .
-        git commit -m "sync[bot]: from source of truth: ${{ inputs.sot-repository }}@${{ inputs.sot-branch }}"
-        git push

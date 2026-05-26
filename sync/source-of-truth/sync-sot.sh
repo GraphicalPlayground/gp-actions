@@ -57,6 +57,7 @@ _sot_parse_inputs() {
   allow_templatization="$(_sot_field '.["allow-templatization"]')"
   files_to_sync="$(_sot_field '.["file-to-sync"]')"
   custom_vars_raw="$(_sot_field '.["custom-vars"] // "{}"')"
+  push_changes="$(_sot_field '.["push-changes"]')"
 
   _SOT_WORKSPACE="$(gp.getWorkspace)"
 }
@@ -288,6 +289,37 @@ _sot_sync_file() {
   gp.success "  ✓ ${target_rel}"
 }
 
+#  Commit and push changes
+
+_sot_commit_and_push() {
+  gp.startGroup "Committing Changes"
+
+  gp.requireCommand git
+
+  # The nested SOT checkout step temporarily overrides HOME to write global git
+  # config, which evicts the safe.directory entry the caller's checkout set for
+  # GITHUB_WORKSPACE. Re-declare it here so subsequent git commands can see it.
+  git config --global --add safe.directory "${_SOT_WORKSPACE}"
+
+  git -C "${_SOT_WORKSPACE}" config user.name  "github-actions[bot]"
+  git -C "${_SOT_WORKSPACE}" config user.email "github-actions[bot]@users.noreply.github.com"
+
+  if git -C "${_SOT_WORKSPACE}" diff --quiet \
+      && git -C "${_SOT_WORKSPACE}" diff --cached --quiet; then
+    gp.info "No changes to commit."
+    gp.endGroup
+    return 0
+  fi
+
+  git -C "${_SOT_WORKSPACE}" add .
+  git -C "${_SOT_WORKSPACE}" commit \
+    -m "sync[bot]: from source of truth: ${sot_repository}@${sot_branch}"
+  git -C "${_SOT_WORKSPACE}" push
+
+  gp.success "Changes committed and pushed."
+  gp.endGroup
+}
+
 #  Step summary
 
 _sot_write_summary() {
@@ -328,6 +360,7 @@ main() {
   gp.info "Templatization: ${allow_templatization}"
   gp.info "Workspace     : ${_SOT_WORKSPACE}"
   gp.info "Files         : ${files_to_sync}"
+  gp.info "Push Changes  : ${push_changes}"
   gp.endGroup
 
   _sot_build_vars
@@ -359,6 +392,8 @@ main() {
   # Expose counts as step outputs
   gp.setOutput "synced-count" "$synced"
   gp.setOutput "skipped-count" "$skipped"
+
+  [[ "$push_changes" == "true" ]] && _sot_commit_and_push
 }
 
 main
