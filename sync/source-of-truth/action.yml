@@ -49,7 +49,7 @@ inputs:
       are treated as partial templates: only the header and footer are overwritten
       and the region between the markers is preserved per-repository.
     required: false
-    default: 'SECURITY.md,DONORS.md,CODE_OF_CONDUCT.md,README.md,CITATION.cff,LICENSE_HEADER,.github/FUNDING.yml,LICENSE.md,.mailmap,GOVERNANCE.md'
+    default: 'SECURITY.md,DONORS.md,CODE_OF_CONDUCT.md,README.md,CITATION.cff,LICENSE_HEADER,.github/FUNDING.yml,LICENSE.md,.mailmap,GOVERNANCE.md,translations/es/README.md,translations/es/SECURITY.md,translations/fr/README.md,translations/fr/SECURITY.md,translations/zh-cn/README.md,translations/zh-cn/SECURITY.md'
   push-changes:
     description: 'Whether to automatically commit and push changes after synchronization.'
     required: true
@@ -74,6 +74,14 @@ inputs:
       If the branch already exists it is reset and force-pushed.
     required: false
     default: 'sync/source-of-truth'
+  commit-username:
+    description: 'Username for git commits.'
+    required: false
+    default: 'github-actions[bot]'
+  commit-email:
+    description: 'Email for git commits.'
+    required: false
+    default: 'github-actions[bot]@users.noreply.github.com'
 
 outputs:
   synced-count:
@@ -119,6 +127,8 @@ runs:
           --arg target_branches "${{ inputs.target-branches }}" \
           --argjson create_pr ${{ inputs.create-pr }} \
           --arg pr_branch "${{ inputs.pr-branch }}" \
+          --arg commit_username "${{ inputs.commit-username }}" \
+          --arg commit_email "${{ inputs.commit-email }}" \
           '{
             "license": $license,
             "sot-repository": $sot_repository,
@@ -130,6 +140,8 @@ runs:
             "push-changes": $push_changes,
             "target-branches": $target_branches,
             "create-pr": $create_pr,
-            "pr-branch": $pr_branch
+            "pr-branch": $pr_branch,
+            "commit-username": $commit_username,
+            "commit-email": $commit_email
           }'
         )" | ${{ github.action_path }}/sync-sot.sh

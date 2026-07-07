@@ -66,6 +66,8 @@ _sot_parse_inputs() {
   target_branches="$(_sot_field '.["target-branches"]')"
   create_pr="$(_sot_field '.["create-pr"]')"
   pr_branch="$(_sot_field '.["pr-branch"]')"
+  commit_username="$(_sot_field '.["commit-username"]')"
+  commit_email="$(_sot_field '.["commit-email"]')"
 
   _SOT_WORKSPACE="$(gp.getWorkspace)"
 }
@@ -306,8 +308,8 @@ _sot_commit_and_push() {
 
   gp.requireCommand git
 
-  git config --global user.name  "github-actions[bot]"
-  git config --global user.email "github-actions[bot]@users.noreply.github.com"
+  git config --global user.name  "$commit_username"
+  git config --global user.email "$commit_email"
 
   local sot_rel
   sot_rel="$(realpath --relative-to="$_SOT_WORKSPACE" "$sot_path")"
