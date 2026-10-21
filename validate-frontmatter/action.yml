@@ -1,0 +1,107 @@
+# Copyright (c) - Graphical Playground. All rights reserved.
+# For more information, see https://graphical-playground/legal
+# mailto:support AT graphical-playground DOT com
+
+name: 'Validate Frontmatter'
+description: 'Validate the frontmatter of Markdown files in the repository.'
+
+branding:
+  icon: 'check-square'
+  color: 'blue'
+
+inputs:
+  files:
+    description: >
+      Comma-separated list of Markdown files to validate.
+      Example: 'README.md,docs/guide.md'
+    required: true
+  schema:
+    description: >
+      Path to the JSON Schema file used to validate the frontmatter.
+      Example: '.github/frontmatter-schema.json'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Frontmatter Validation
+      shell: bash
+      env:
+        INPUT_FILES: ${{ inputs.files }}
+        INPUT_SCHEMA: ${{ inputs.schema }}
+      run: |
+        echo "Setting up temporary validation environment..."
+        export TEMP_DIR=$(mktemp -d)
+        cd "$TEMP_DIR"
+        npm init -y > /dev/null 2>&1
+        # Install gray-matter for YAML parsing and ajv for JSON Schema validation
+        npm install gray-matter ajv > /dev/null 2>&1
+        cd - > /dev/null
+
+        echo "Validating frontmatter..."
+        export NODE_PATH="$TEMP_DIR/node_modules"
+        node -e "
+        const fs = require('fs');
+        const path = require('path');
+        const matter = require('gray-matter');
+        const Ajv = require('ajv');
+
+        const ajv = new Ajv({ allErrors: true });
+        const workspace = process.env.GITHUB_WORKSPACE || '.';
+        const schemaPath = path.resolve(workspace, process.env.INPUT_SCHEMA);
+        const filesStr = process.env.INPUT_FILES || '';
+        const files = filesStr.split(',').map(f => f.trim()).filter(Boolean);
+
+        if (!fs.existsSync(schemaPath)) {
+          console.error('\x1b[31m%s\x1b[0m', '::error::Schema file not found at ' + schemaPath);
+          process.exit(1);
+        }
+
+        let schema;
+        try {
+          schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+        } catch (err) {
+          console.error('\x1b[31m%s\x1b[0m', '::error::Failed to parse JSON schema: ' + err.message);
+          process.exit(1);
+        }
+
+        const validate = ajv.compile(schema);
+        let hasErrors = false;
+
+        for (const file of files) {
+          const filePath = path.resolve(workspace, file);
+          if (!fs.existsSync(filePath)) {
+            console.error('\x1b[31m%s\x1b[0m', '::error file=' + file + '::File not found: ' + file);
+            hasErrors = true;
+            continue;
+          }
+
+          let content;
+          try {
+            content = fs.readFileSync(filePath, 'utf8');
+          } catch (err) {
+            console.error('\x1b[31m%s\x1b[0m', '::error file=' + file + '::Failed to read file: ' + file);
+            hasErrors = true;
+            continue;
+          }
+
+          const parsed = matter(content);
+          const frontmatter = parsed.data;
+
+          const valid = validate(frontmatter);
+          if (!valid) {
+            console.error('\x1b[31m%s\x1b[0m', '::error file=' + file + '::Validation failed for ' + file);
+            validate.errors.forEach(err => {
+              const field = err.instancePath || 'root';
+              console.error('  - ' + field + ' ' + err.message);
+            });
+            hasErrors = true;
+          } else {
+            console.log('\x1b[32m%s\x1b[0m', 'Successfully validated ' + file);
+          }
+        }
+
+        if (hasErrors) {
+          process.exit(1);
+        }
+        "
