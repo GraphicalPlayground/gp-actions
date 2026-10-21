@@ -1,0 +1,86 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "Actions"
+    }
+  ],
+  "settings": {
+    "material-icon-theme.folders.associations": {
+      "sync": "ci",
+      "source-of-truth": "features",
+      "setup": "job",
+      "validate-frontmatter": "tasks"
+    },
+    /* Language Settings */
+    "editor.insertSpaces": true,
+    "[json]": {
+      "editor.tabSize": 2,
+      "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[jsonc]": {
+      "editor.tabSize": 2,
+      "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[jsonl]": {
+      "editor.tabSize": 2,
+      "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[markdown]": {
+      "editor.tabSize": 2,
+      "editor.rulers": [
+        100
+      ],
+      "files.trimTrailingWhitespace": false
+    },
+    "[mdx]": {
+      "editor.tabSize": 2,
+      "editor.rulers": [
+        100
+      ],
+      "files.trimTrailingWhitespace": false
+    },
+    "[yaml]": {
+      "editor.tabSize": 2
+    },
+    "[xml]": {
+      "editor.tabSize": 2
+    },
+    "[xaml]": {
+      "editor.tabSize": 2
+    },
+    "[shellscript]": {
+      "editor.tabSize": 2
+    },
+    /* Git Settings */
+    "git.addAICoAuthor": "off",
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "files.eol": "\n",
+    /* Editor Settings */
+    "editor.quickSuggestionsDelay": 0,
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": false
+    },
+    "chat.titleBar.openInAgentsWindow.enabled": false
+  },
+  "extensions": {
+    "recommendations": [
+      /* Remote Development */
+      "ms-vscode-remote.remote-containers",
+      /* Markdown */
+      "bierner.github-markdown-preview",
+      "yzhang.markdown-all-in-one",
+      "bierner.markdown-preview-github-styles",
+      /* Github */
+      "GitHub.vscode-pull-request-github",
+      "github.vscode-github-actions",
+      "me-dutour-mathieu.vscode-github-actions",
+      /* Other */
+      "FanaticPythoner.better-todo-tree"
+    ],
+    "unwantedRecommendations": []
+  },
+}
