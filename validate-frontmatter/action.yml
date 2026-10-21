@@ -88,6 +88,10 @@ runs:
           const parsed = matter(content);
           const frontmatter = parsed.data;
 
+          if (frontmatter.date instanceof Date) {
+            frontmatter.date = frontmatter.date.toISOString().split('T')[0];
+          }
+
           const valid = validate(frontmatter);
           if (!valid) {
             console.error('\x1b[31m%s\x1b[0m', '::error file=' + file + '::Validation failed for ' + file);
